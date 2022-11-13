@@ -63,14 +63,7 @@ class UserViewModel(): ViewModel() {
                 dao!!.insertLocation(locationModel.latitude, locationModel.longitude)
             }
         )
-        val result = list.awaitAll()
-        Toast.makeText(application!!.baseContext, result[0].toString(), Toast.LENGTH_LONG).show()
-        /*GlobalScope.async {
-            isLoading.value = true
-            dao!!.insertLocation(locationModel.latitude, locationModel.longitude)
-//            dao!!.insertLocation(locationModel)
-            isLoading.value = false
-        }*/
+        list.awaitAll()
     }
 
     fun getUserData(): LiveData<List<UserModel>>{
