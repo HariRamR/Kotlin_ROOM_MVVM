@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_register"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:padding="@dimen/twenty_dp">
+
+    <ProgressBar
+        android:id="@+id/progress_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/register_here_ac"
+        android:textSize="@dimen/thirty_sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/user_name_et_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/secondary_txt_clr"
+        android:inputType="textEmailAddress"
+        android:textSize="@dimen/eighteen_sp"
+        android:drawableStart="@drawable/ic_person"
+        android:drawablePadding="@dimen/ten_dp"
+        android:hint="@string/username"
+        android:layout_marginTop="@dimen/twenty_dp"/>
+
+    <EditText
+        android:id="@+id/mail_id_et_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/secondary_txt_clr"
+        android:inputType="textEmailAddress"
+        android:textSize="@dimen/eighteen_sp"
+        android:drawableStart="@drawable/ic_email"
+        android:drawablePadding="@dimen/ten_dp"
+        android:hint="@string/email_address"
+        android:layout_marginTop="@dimen/twenty_dp"/>
+
+    <EditText
+        android:id="@+id/password_et_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/secondary_txt_clr"
+        android:inputType="textPassword"
+        android:textSize="@dimen/eighteen_sp"
+        android:drawableStart="@drawable/ic_lock"
+        android:drawablePadding="@dimen/ten_dp"
+        android:hint="@string/password"
+        android:layout_marginTop="@dimen/twenty_dp"/>
+
+    <Button
+        android:id="@+id/done_btn_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/done"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:layout_marginTop="@dimen/fifty_dp"/>
+
+</LinearLayout>
