@@ -56,14 +56,18 @@ class UserViewModel(): ViewModel() {
         }
     }
 
-    suspend fun insertLocation(locationModel: LocationModel){
-        val list = ArrayList<Deferred<Long>>()
-        list.add(
-            GlobalScope.async {
-                dao!!.insertLocation(locationModel.latitude, locationModel.longitude)
-            }
-        )
-        list.awaitAll()
+    fun insertLocation(locationModel: LocationModel){
+
+        GlobalScope.async {
+            dao!!.insertLocation(locationModel.latitude, locationModel.longitude)
+        }
+    }
+
+    fun deleteLocation(){
+
+        GlobalScope.async {
+            dao!!.deleteLocation()
+        }
     }
 
     fun getUserData(): LiveData<List<UserModel>>{

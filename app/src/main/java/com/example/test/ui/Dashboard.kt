@@ -174,7 +174,8 @@ class Dashboard : AppCompatActivity() {
 
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, getLocationListner(isFromLogOut, alertDialog))
                 }else if(isFromLogOut) {
-                    buildCheckOutDialog(loc.latitude, loc.longitude)
+                    viewModel!!.deleteLocation()
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, getLocationListner(isFromLogOut, alertDialog))
                 }else{
                     if(alertDialog != null && alertDialog.isShowing){
                         alertDialog.dismiss()
@@ -184,10 +185,9 @@ class Dashboard : AppCompatActivity() {
         } catch (ex:SecurityException) {
             Log.e("LocationManager", "fetchLocation: Failed")
         }
-//        return addressList!!
     }
 
-    fun getLocationListner(isFromLogOut: Boolean, alertDialog: AlertDialog?): LocationListener{
+    private fun getLocationListner(isFromLogOut: Boolean, alertDialog: AlertDialog?): LocationListener{
 
         val locationListener: LocationListener = object : LocationListener{
 
