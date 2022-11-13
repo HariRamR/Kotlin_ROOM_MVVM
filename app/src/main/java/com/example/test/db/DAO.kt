@@ -8,8 +8,10 @@ import com.example.test.model.UserModel
 interface DAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(userModel: UserModel): Long
-    @Insert
-    fun insertLocation(locationModel: LocationModel)
+    @Query("INSERT INTO locationMaster values (:latitude, :longitude)")
+    fun insertLocation(latitude: String, longitude: String): Long
+    /*@Insert
+    fun insertLocation(locationModel: LocationModel)*/
     @Query("UPDATE userMaster SET isCurrentUser = 1 WHERE email = :email")
     fun update(email: String)
     @Delete

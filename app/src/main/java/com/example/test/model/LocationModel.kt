@@ -7,10 +7,9 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "locationMaster")
 data class LocationModel(
 
-    @PrimaryKey(autoGenerate = true)
-    val id1: Int = 0,
+    @PrimaryKey
     @ColumnInfo(name = "lat")
-    val latitude: String = "",
+    val latitude: String,
     @ColumnInfo(name = "long")
-    val longitude: String = ""
+    val longitude: String
 )

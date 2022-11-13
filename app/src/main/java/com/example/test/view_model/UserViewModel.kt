@@ -1,6 +1,7 @@
 package com.example.test.view_model
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -55,12 +56,21 @@ class UserViewModel(): ViewModel() {
         }
     }
 
-    fun insertLocation(locationModel: LocationModel){
-        GlobalScope.async {
+    suspend fun insertLocation(locationModel: LocationModel){
+        val list = ArrayList<Deferred<Long>>()
+        list.add(
+            GlobalScope.async {
+                dao!!.insertLocation(locationModel.latitude, locationModel.longitude)
+            }
+        )
+        val result = list.awaitAll()
+        Toast.makeText(application!!.baseContext, result[0].toString(), Toast.LENGTH_LONG).show()
+        /*GlobalScope.async {
             isLoading.value = true
-            dao!!.insertLocation(locationModel)
+            dao!!.insertLocation(locationModel.latitude, locationModel.longitude)
+//            dao!!.insertLocation(locationModel)
             isLoading.value = false
-        }
+        }*/
     }
 
     fun getUserData(): LiveData<List<UserModel>>{

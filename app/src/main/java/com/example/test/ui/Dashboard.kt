@@ -6,12 +6,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
-import android.location.Location
-import android.location.LocationManager
+import android.location.*
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -28,16 +26,14 @@ import com.example.test.R
 import com.example.test.adapter.UserAdapter
 import com.example.test.model.LocationModel
 import com.example.test.view_model.UserViewModel
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
 class Dashboard : AppCompatActivity() {
 
-    private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val permissionId = 1001
     private var viewModel: UserViewModel?= null
+    lateinit var locationManager: LocationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +48,8 @@ class Dashboard : AppCompatActivity() {
 
         val progressBar = findViewById<ProgressBar>(R.id.progress_bar_dashboard)
 
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
         viewModel = UserViewModel(application)
         viewModel!!.getUserData().observe(this, Observer {
             it.let {
@@ -65,7 +63,6 @@ class Dashboard : AppCompatActivity() {
             }else progressBar.visibility = View.GONE
         })
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLocation()
     }
 
@@ -167,58 +164,57 @@ class Dashboard : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun fetchLocation(alertDialog: AlertDialog?, isFromLogOut: Boolean = false): List<Address>{
+    private fun fetchLocation(alertDialog: AlertDialog?, isFromLogOut: Boolean = false){
 
-        var addressList: List<Address> ?= listOf()
-        mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-            val location: Location? = task.result
-            if (location != null) {
-                val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            runBlocking {
 
-                addressList = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                val loc = viewModel!!.getLocation()
+                if(loc == null){
 
-                if (isFromLogOut){
-
-                    val builder = AlertDialog.Builder(this)
-                    val customLayout: View = layoutInflater.inflate(R.layout.custom_dialog, null)
-                    builder.setView(customLayout)
-                    val titleTv = customLayout
-                        .findViewById<TextView>(
-                            R.id.title_custom_dialog
-                        )
-                    val msgTv = customLayout
-                        .findViewById<TextView>(
-                            R.id.msg_custom_dialog
-                        )
-                    titleTv.text = getString(R.string.location)
-                    msgTv.text = String.format("%s", "Your check out location is \n Latitude: ${addressList!![0].latitude} \n Longitude: ${addressList!!.get(0).longitude}")
-
-                    builder
-                        .setPositiveButton(
-                            "OK"
-                        ) { dialog, _ ->
-
-                            dialog.dismiss()
-                            startActivity(Intent(this, Login::class.java))
-                            finish()
-                        }
-                    builder.setCancelable(false)
-                    val dialog = builder.create()
-                    dialog.show()
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, getLocationListner(isFromLogOut, alertDialog))
+                }else if(isFromLogOut) {
+                    buildCheckOutDialog(loc.latitude, loc.longitude)
                 }else{
-
-                    viewModel!!.insertLocation(LocationModel(1, addressList!![0].latitude.toString(), addressList!![0].longitude.toString()))
-
-                    runOnUiThread {
-                        buildCheckInDialog("Your check in location is \n" +
-                                " Latitude: ${addressList!![0].latitude} \n" +
-                                " Longitude: ${addressList!![0].longitude}")
+                    if(alertDialog != null && alertDialog.isShowing){
+                        alertDialog.dismiss()
                     }
                 }
             }
-            alertDialog?.dismiss()
+        } catch (ex:SecurityException) {
+            Log.e("LocationManager", "fetchLocation: Failed")
         }
-        return addressList!!
+//        return addressList!!
+    }
+
+    fun getLocationListner(isFromLogOut: Boolean, alertDialog: AlertDialog?): LocationListener{
+
+        val locationListener: LocationListener = object : LocationListener{
+
+            override fun onLocationChanged(location: Location) {
+
+                locationManager.removeUpdates(this)
+                if (isFromLogOut){
+
+                    buildCheckOutDialog(location.latitude.toString(), location.longitude.toString())
+                }else{
+
+                    runBlocking {
+
+                        viewModel!!.insertLocation(LocationModel(latitude = location.latitude.toString(), longitude = location.longitude.toString()))
+                    }
+
+                    runOnUiThread {
+                        buildCheckInDialog("Your check in location is \n" +
+                                " Latitude: ${location.latitude} \n" +
+                                " Longitude: ${location.longitude}")
+                    }
+                }
+
+                alertDialog?.dismiss()
+            }
+        }
+        return locationListener
     }
 
     private fun buildCheckInDialog(msg: String){
@@ -244,6 +240,35 @@ class Dashboard : AppCompatActivity() {
 
                 dialog.dismiss()
             }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    fun buildCheckOutDialog(latitude: String, longitude: String){
+        val builder = AlertDialog.Builder(this@Dashboard)
+        val customLayout: View = layoutInflater.inflate(R.layout.custom_dialog, null)
+        builder.setView(customLayout)
+        val titleTv = customLayout
+            .findViewById<TextView>(
+                R.id.title_custom_dialog
+            )
+        val msgTv = customLayout
+            .findViewById<TextView>(
+                R.id.msg_custom_dialog
+            )
+        titleTv.text = getString(R.string.location)
+        msgTv.text = String.format("%s", "Your check out location is \n Latitude: ${latitude} \n Longitude: ${longitude}")
+
+        builder
+            .setPositiveButton(
+                "OK"
+            ) { dialog, _ ->
+
+                dialog.dismiss()
+                startActivity(Intent(this@Dashboard, Login::class.java))
+                finish()
+            }
+        builder.setCancelable(false)
         val dialog = builder.create()
         dialog.show()
     }
